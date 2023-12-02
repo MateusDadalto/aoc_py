@@ -14,8 +14,13 @@ digits = []
 
 
 def first_digit(s: str, d: list[int]):
-    first = d[0]
-    i = s.index(first)
+    if len(d) == 0:
+        first = ""
+        i = len(s) - 1
+    else:
+        first = d[0]
+        i = s.index(first)
+
     for j in range(3, i + 1):
         substring = s[0:j]
         if substring.endswith(digits_name):
@@ -27,7 +32,13 @@ def first_digit(s: str, d: list[int]):
 
 
 def last_digit(s: str, d: list[int]):
-    last = d[-1]
+    if len(d) == 0:
+        last = ""
+        i = 0
+    else:
+        last = d[-1]
+        i = s.index(last)
+
     i = s.rindex(last)
     for j in range(i, len(s)).__reversed__():
         substring = s[i:j]
@@ -38,13 +49,14 @@ def last_digit(s: str, d: list[int]):
 
     return str(last)
 
+
 # Open the file in read mode ('r')
 with open('day_1.txt', 'r') as file:
     i = 1
     for line in file:
         line_ds = [d for d in line if d.isdigit()]
-        first_digit(line, line_ds)
-        digits.append(int(first_digit(line, line_ds)+last_digit(line, line_ds)))
+        digits.append(int(first_digit(line, line_ds) +
+                      last_digit(line, line_ds)))
         i += 1
 
 print(sum(digits))
