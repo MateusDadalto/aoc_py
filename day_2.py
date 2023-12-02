@@ -1,38 +1,35 @@
 path = "day_2.txt"
 # path = "test.txt"
 
-bag = {
-    "red": 12,
-    "green": 13,
-    "blue": 14
-}
 
 r = {}
 
-
-def is_valid(draw: str):
+def set_min_bag(draw: str, bag: dict[str, int]):
     for b in draw.split(', '):
         balls = b.split(' ')
-
-        if int(balls[0]) > bag.get(balls[1]):
-            return False
-
-    return True
-
+        qty = int(balls[0])
+        if qty > bag.get(balls[1]):
+            bag[balls[1]] = qty
+    
 with open(path, 'r') as file:
-    for line in file:
-        parts = line.strip().split(': ')
+    for game in file:
+        bag = {
+            "red": 0,
+            "green": 0,
+            "blue": 0
+        }
+
+        parts = game.strip().split(': ')
         id = int(parts[0].removeprefix('Game').strip())
         valid = True
         draws = parts[1].split('; ')
         for draw in draws:
-            if not is_valid(draw):
-                valid = False
-                continue
+            set_min_bag(draw, bag)
             # balls = { b.split(' ')[1]:b.split(' ')[0] for b in game.split(', ') }
 
-        r[id] = valid
+        r[id] = bag
         # print(games)
 
-answer = sum(key for key, value in r.items() if value)
+answer = sum(bag.get('red', 1) * bag.get('blue', 1) * bag.get('green', 1) for bag in r.values())
+
 print(answer)
