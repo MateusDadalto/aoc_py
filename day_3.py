@@ -30,16 +30,23 @@ for i, c in enumerate(lines):
 
     symbols.append((i))
 
-result = 0
+gears = []
 neighboors = [-size -1, -size, -size +1, +1, size + 1, size, size -1, -1]
 for symbol in symbols:
+    total_n = []
+    visited = []
     for n in neighboors:
         i = symbol + n
+        if i in visited:
+            continue
+
         value, indexes = digits.pop(i, (0, []))
         if value != 0:
-            result += value
-            for j in indexes:
-                digits.pop(j, None)
+            total_n.append(value)
+            visited.extend(indexes)
+    
+    if len(total_n) == 2:
+        gears.append(total_n[0]*total_n[1])
             
 
-print(result)
+print(sum(gears))
