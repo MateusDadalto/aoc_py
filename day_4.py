@@ -35,10 +35,10 @@ with open(path, 'r') as file:
         scratch_info = line[1].split('|')
         # [a, b, c]
         winning_numbers = [
-            int(n) for n in scratch_info[0].strip().replace('  ', ' ').split(' ')]
+            int(n) for n in scratch_info[0].strip().split()]
         # [i, j, k]
         player_numbers = [
-            int(n) for n in scratch_info[1].strip().replace('  ', ' ').split(' ')]
+            int(n) for n in scratch_info[1].strip().split()]
 
         # get the cards intersection and then the cards won
         intersection = [a for a in player_numbers if a in winning_numbers]
