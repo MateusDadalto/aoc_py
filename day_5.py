@@ -55,12 +55,16 @@ with open(path, 'r') as file:
     
 
 locations = []
-for seed in seeds:
-    source = 'seed'
-    value = seed
-    while source != 'location':
-        value, source = map_source(source, value)
+seed_range = [seeds[i:i+2] for i in range(0, len(seeds), 2)]
+print(seed_range)
+for r in seed_range:
+    print(r)
+    for seed in range(r[0], r[0] + r[1] + 1):
+        source = 'seed'
+        value = seed
+        while source != 'location':
+            value, source = map_source(source, value)
 
-    locations.append(value)
+        locations.append(value)
 
 print(min(locations))
