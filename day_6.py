@@ -4,11 +4,9 @@ path = "day_6.txt"
 with open(path, 'r') as file:
     lines = file.readlines()
 
-    time = [int(t) for t in lines[0].removeprefix('Time:').split()]
-    goal = [int(d) for d in lines[1].removeprefix('Distance:').split()]
+    time = int(''.join(lines[0].removeprefix('Time:').split()))
+    goal = int(''.join(lines[1].removeprefix('Distance:').split()))
     
-races = zip(time, goal)
-
 def achieve_goal(race):
     time, goal = race
     counter = 0
@@ -22,8 +20,6 @@ def achieve_goal(race):
 
     return counter
 
-r = 1
-for race in races:
-    r *= achieve_goal(race)
+r = achieve_goal((time, goal))
 
 print(r)
