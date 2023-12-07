@@ -6,7 +6,7 @@ path = "day_7.txt"
 
 class Card(Enum):
     T = 10
-    J = 11
+    J = 0
     Q = 12
     K = 13
     A = 14
@@ -23,6 +23,9 @@ class HandType(Enum):
     def __lt__(self, other: object):
         return self.value < other.value
     
+    def __str__(self) -> str:
+        return self.name
+
     def __repr__(self) -> str:
         return self.name
 
@@ -40,8 +43,19 @@ class Hand:
         self.__calculate_hand_type()
 
     def __calculate_hand_type(self):
-        count = [v for v in Counter(self.cards).values()]
+        c = dict(Counter(self.cards))
+        joker_count = 0
+        if 0 in c:
+            joker_count = c.get(0)
+            c.pop(0)
+
+        count = [v for v in c.values()]
         count.sort(reverse=True)
+
+        if joker_count == 5:
+            count = [5]
+        else:
+            count[0] = count[0] + joker_count
 
         if count == [5]:
             self.hand_type = HandType.FIVE
