@@ -15,5 +15,12 @@ def predict(seq: list[int]):
         return seq[-1] + predict(diff(seq))
     else:
         return 0
+    
+def predict_previous(seq: list[int]):
+    if any([i != 0 for i in seq]):
+        return seq[0] - predict_previous(diff(seq))
+    else:
+        return 0
 
-print(sum([predict(s) for s in sequences]))
+
+print(sum([predict_previous(s) for s in sequences]))
