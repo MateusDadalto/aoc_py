@@ -43,7 +43,6 @@ def define_pipe(con):
     
     assert False, f"All cases should be covered. Connections:{con}, borders: {borders}" 
 
-    
 
 max_col = len(grid[0])
 max_row = len(grid)
@@ -69,8 +68,8 @@ row, col = start
 loop = []
 previous = start
 nxt = None
-while (not looped):
-    loop.append((grid[row][col], row, col))
+while not looped:
+    loop.append((row, col))
     c = connections(grid[row][col], row, col)
 
     assert len(c) == 2, f"current should be a pipe. Current: {grid[col][row]}, row: {row}, col: {col}"
@@ -80,6 +79,35 @@ while (not looped):
     row = new_row
     col = new_col
 
-    looped = row == loop[0][1] and col == loop[0][2]
-    
-print(len(loop) // 2)
+    looped = row == loop[0][0] and col == loop[0][1]
+
+print("Part 1: ", len(loop) // 2)
+
+loop = set(loop)
+in_loop = 0
+
+# loops and knots...
+# thanks to reddit I realized that if there is an odd number of '|', 'L', 'J'
+# I could assume that the grid element must be inside the loop
+# ... Yeah, would never think of that myself
+for i in range(max_row):
+    left = 0
+    for j in range(max_col):
+        if grid[i][j] in ['|', 'L', 'J'] and (i,j) in loop:
+            left += 1
+        elif (i,j) not in loop and left%2 != 0:
+            in_loop += 1
+
+print(in_loop)
+
+## print loop in terminal to visualize the mess
+# OKGREEN = '\033[92m'
+# ENDC = '\033[0m'
+# for i,line in enumerate(grid):
+#     print("\n", end='')
+
+#     for j,c in enumerate(line):
+#         if (i,j) in loop:
+#             print(f'{OKGREEN}{c}{ENDC}', end='')
+#         else:
+#             print(c, end='')
