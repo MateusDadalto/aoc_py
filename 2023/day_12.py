@@ -2,7 +2,7 @@ import re
 from itertools import permutations, product, combinations, combinations_with_replacement
 
 path = "day_12.txt"
-# path = "test.txt"
+path = "test.txt"
 
 def validate_line(line, dist):
     matches = re.findall(r'#+', line)
@@ -18,8 +18,13 @@ with open(path, 'r') as file:
     for line in file:
         line = line.strip()
         springs, dist = line.split()
+        # unfold
+        springs = ((springs +'?') * 5)[:-1]
+        print(springs)
         springs = [c for c in springs]
-        dist = [int(d) for d in dist.split(',')]
+        # unfold
+        dist = [int(d) for d in dist.split(',')] * 5
+        print(dist)
         questions = [i for i in range(len(springs)) if springs[i] == '?']
         # print(len(questions))
 
