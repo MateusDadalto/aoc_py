@@ -4,9 +4,6 @@ path = "day_16.txt"
 with open(path, 'r') as file:
     grid = [[c for c in line.strip()] for line in file]
 
-beams = [(0, -1, 'R')]
-R = len(grid)
-C = len(grid)
 directions = {
     'U': (-1, 0),
     'D': (1, 0),
@@ -21,7 +18,7 @@ reflections = {
 }
 
 
-def beam_deflect(beam, i, j, char):
+def beam_deflect(beam, char):
     if char == '-':
         return beam[2] if beam[2] in 'RL' else 'RL'
 
@@ -30,40 +27,61 @@ def beam_deflect(beam, i, j, char):
 
     return reflections[beam[2]][char]
 
+def propagate_beam(initial, grid):
+    beams = [initial]
+    R = len(grid)
+    C = len(grid)
 
-energized = set()
-seen = set()
-while len(beams) > 0:
-    beam = beams.pop()
-    i, j = (beam[0] + directions[beam[2]][0], beam[1] + directions[beam[2]][1])
+    energized = set()
+    seen = set()
+    while len(beams) > 0:
+        beam = beams.pop()
+        i, j = (beam[0] + directions[beam[2]][0], beam[1] + directions[beam[2]][1])
 
-    # Beam got to the end of the grid or is a beam we already saw before
-    if i >= R or j >= C or i < 0 or j < 0 or beam in seen:
-        
-        continue
+        # Beam got to the end of the grid or is a beam we already saw before
+        if i >= R or j >= C or i < 0 or j < 0 or beam in seen:
+            
+            continue
 
-    seen.add(beam)
-    energized.add((i,j))
-    if grid[i][j] == '.':
-        beam = (i,j,beam[2])
-        beams.append(beam)
-        continue
+        seen.add(beam)
+        energized.add((i,j))
+        if grid[i][j] == '.':
+            beam = (i,j,beam[2])
+            beams.append(beam)
+            continue
 
-    # If we got here, the beam will be deflected, so we can delete it
+        # If we got here, the beam will be deflected, so we can delete it
 
-    for d in beam_deflect(beam, i, j, grid[i][j]):
-        beam = (i,j,d)
-        beams.append(beam)
+        for d in beam_deflect(beam, grid[i][j]):
+            beam = (i,j,d)
+            beams.append(beam)
 
-print(len(energized))
+    return len(energized)
 
-for i,line in enumerate(grid):
-    print("\n", end='')
+answer = 0
+# from above or below
+for j in range(len(grid[0])):
+    # From up going down
+    answer = max(propagate_beam((-1, j, 'D'), grid), answer)
+    # From below going up
+    answer = max(propagate_beam((len(grid), j, 'U'), grid), answer)
 
-    for j,c in enumerate(line):
-        if (i,j) in energized:
-            print('#', end='')
-        else:
-            print('.', end='')
+# from left or right
+for i in range(len(grid)):
+    # From left going right
+    answer = max(propagate_beam((i, -1, 'R'), grid), answer)
+    # From right going left
+    answer = max(propagate_beam((i, len(grid[0]), 'L'), grid), answer)
+
+print(answer)
+
+# for i,line in enumerate(grid):
+#     print("\n", end='')
+
+#     for j,c in enumerate(line):
+#         if (i,j) in energized:
+#             print('#', end='')
+#         else:
+#             print('.', end='')
     
-print()
+# print()
