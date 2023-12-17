@@ -30,7 +30,9 @@ possible = {
 def get_vertices(current, direction, straight_count):
     p = [d for d in possible[direction]]
 
-    if straight_count >= 3:
+    if straight_count < 4:
+        p = [direction]
+    if straight_count >= 10:
         p.pop()
     
     valid_vertices = []
@@ -85,7 +87,7 @@ while len(q) > 0:
         else:
             heapq.heappush(q,(distance, nxt_coord, dir, 1, nxt_path))
 
-print(answer)
 draw(hlpath, grid)
+print(answer)
 
     
