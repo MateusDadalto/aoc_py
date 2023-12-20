@@ -1,4 +1,5 @@
 from collections import deque
+from math import lcm
 
 
 path = "day_20.txt"
@@ -62,12 +63,18 @@ class Button:
     def __init__(self) -> None:
         self.connections = [BROADCASTER]
 
+    def __str__(self) -> str:
+        return f'connections: {self.connections}'
+
     def receive(self, source, pulse):
         return LOW
 
 class Output:
     def __init__(self) -> None:
         self.connections = []
+
+    def __str__(self) -> str:
+        return f'connections: {self.connections}'
     
     def receive(self, source, pulse):
         return None
@@ -106,12 +113,28 @@ for m in modules:
 
 low_total = 0
 high_total = 0
+button_pressed = 0
+rx = False
+last_print = 0
 
-for _ in range(1000):
+cycles = {k: 0 for k in modules['hp'].state}
+all_cycles_detected = False
+# I manually saw that 'hp' in a Conjunction module
+# so all states in 'hp' will need to be HIGH for it to send low
+# So... Let's detect Cycles! (and hope they start in the beginning)
+while not all_cycles_detected:
+    button_pressed += 1
     q = deque([(BUTTON, None, None)])
-
     while len(q) > 0:
         m, source, pulse = q.popleft()
+
+        if m == 'rx' and (1 in modules['hp'].state.values()):
+            state = modules['hp'].state
+            for k in state:
+                if(state[k] == HIGH):
+                    cycles[k] = button_pressed
+            
+            all_cycles_detected = all([v != 0 for v in cycles.values()])
 
         module = modules.get(m, Output())
         output = module.receive(source, pulse)
@@ -122,7 +145,8 @@ for _ in range(1000):
             high_total += len(module.connections)
         elif output == LOW:
             low_total += len(module.connections)
+
         for c in module.connections:
             q.append((c, m, output))
 
-print(low_total, high_total, low_total * high_total)
+print(lcm(*cycles.values()))
