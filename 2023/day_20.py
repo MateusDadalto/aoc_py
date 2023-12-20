@@ -113,16 +113,15 @@ for m in modules:
 
 low_total = 0
 high_total = 0
+part_1 = 0
 button_pressed = 0
-rx = False
-last_print = 0
-
 cycles = {k: 0 for k in modules['hp'].state}
 all_cycles_detected = False
-# I manually saw that 'hp' in a Conjunction module
+# For Part 2...
+# I manually saw that 'hp' is a Conjunction module
 # so all states in 'hp' will need to be HIGH for it to send low
 # So... Let's detect Cycles! (and hope they start in the beginning)
-while not all_cycles_detected:
+while not all_cycles_detected or button_pressed < 1000:
     button_pressed += 1
     q = deque([(BUTTON, None, None)])
     while len(q) > 0:
@@ -149,4 +148,9 @@ while not all_cycles_detected:
         for c in module.connections:
             q.append((c, m, output))
 
-print(lcm(*cycles.values()))
+    ## Part 1 response
+    if button_pressed == 1000:
+        part_1 = low_total*high_total
+
+print("Part 1:", part_1)
+print("Part 2:", lcm(*cycles.values()))
