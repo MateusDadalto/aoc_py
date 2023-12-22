@@ -4,8 +4,6 @@ path = "day_22.txt"
 # path = "test.txt"
 
 # Melting my head with conditions
-
-
 def collision(brick0, brick1):
     x0_0, y0_0, z0_0, x0_1, y0_1, z0_1 = brick0
     x1_0, y1_0, z1_0, x1_1, y1_1, z1_1 = brick1
@@ -32,11 +30,12 @@ for p in positions:
 
 def fall(brick, bricks, removed):
     x0, y0, z0, x1, y1, z1 = brick
+    removed = removed or []
     if z0 == 1:
         return brick
 
     while z0 > 1:
-        if any(collision((x0, y0, z0-1, x1, y1, z1-1), b1) for b1 in bricks[z0-1] if b1 != removed):
+        if any(collision((x0, y0, z0-1, x1, y1, z1-1), b1) for b1 in bricks[z0-1] if b1 not in removed):
             return (x0, y0, z0, x1, y1, z1)
 
         z0 -= 1
@@ -58,19 +57,22 @@ for k in f_bricks:
     for b in f_bricks[k]:
         f_bricks_start[b[2]].append(b)
 
-supports = {}
-cannot_remove = set()
+chain_count = 0
 sorted_z = [z for z in sorted(f_bricks) if len(f_bricks[z]) > 0]
 
 # lets see which block cause another to fall when removed
 for z in sorted_z:
     for b in f_bricks[z]:
-        for b1 in f_bricks_start[z+1]:
-            if fall(b1, f_bricks, b) != b1:
-                print(b)
-                cannot_remove.add(b)
-        
+        removed = set([b])
+        for s in sorted(f_bricks_start):
+            if s > z:
+                for b1 in f_bricks_start[s]:
+                    if fall(b1, f_bricks, removed) != b1:
+                        # print(b)
+                        chain_count += 1
+                        removed.add(b1)
+            
 
-print(total - len(cannot_remove))
+print(chain_count)
 
             
