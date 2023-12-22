@@ -18,16 +18,6 @@ def is_supported(brick0, brick1):
     x0, y0, z0, x1, y1, z1 = brick0
     return collision((x0, y0, z0-1, x1, y1, z1-1), brick1)
 
-with open(path, 'r') as file:
-    positions = [l.strip().split('~') for l in file]
-
-bricks = defaultdict(list)
-total = len(positions)
-for p in positions:
-    x0, y0, z0, x1, y1, z1 = [int(i) for s in p for i in s.split(',')]
-    bricks[z1].append((x0, y0, z0, x1, y1, z1))
-
-
 def fall(brick, bricks, removed):
     x0, y0, z0, x1, y1, z1 = brick
     removed = removed or []
@@ -43,24 +33,37 @@ def fall(brick, bricks, removed):
 
     return (x0, y0, z0, x1, y1, z1)
 
+
+with open(path, 'r') as file:
+    positions = [l.strip().split('~') for l in file]
+
+bricks = defaultdict(list)
+total = len(positions)
+
+for p in positions:
+    x0, y0, z0, x1, y1, z1 = [int(i) for s in p for i in s.split(',')]
+    bricks[z1].append((x0, y0, z0, x1, y1, z1))
+
 # print(sorted(bricks), len(sorted(bricks)))
 
+# The fall part is actually ok, I'm fine with this
 f_bricks = defaultdict(list)
-
 for z in sorted(bricks):
     for i,brick in enumerate(bricks[z]):
         fallen = fall(brick, f_bricks, None)
         f_bricks[fallen[-1]].append(fallen)
 
+# This is insanity, 
+# I'm using this bc my fallen dict saves the blocks based on their top z
+# I need this one to iterate from below and know which blocks can be removed
 f_bricks_start = defaultdict(list)
 for k in f_bricks:
     for b in f_bricks[k]:
         f_bricks_start[b[2]].append(b)
 
+# lets see which block cause another to fall when removed
 chain_count = 0
 sorted_z = [z for z in sorted(f_bricks) if len(f_bricks[z]) > 0]
-
-# lets see which block cause another to fall when removed
 for z in sorted_z:
     for b in f_bricks[z]:
         removed = set([b])
