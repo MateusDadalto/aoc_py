@@ -1,7 +1,6 @@
 from functools import cache
 from itertools import permutations
-
-
+from z3 import Real, Solver, Int, BitVec
 path = "day_24.txt"
 # path = "test.txt"
 
@@ -52,7 +51,31 @@ for p1,p2 in permutations(particles, 2):
     pairs.add((p1,p2))
 
     i = intersect(p1, p2)
+
     if i and lower_limit <= i[0] <= higher_limit and lower_limit <= i[1] <= higher_limit:
         answer += 1
 
-print(answer)
+# part 2...
+        
+def solve(particles):
+    I = lambda name: Real(name)
+    x,y,z = I('x'), I('y'), I('z')
+    vx,vy,vz = I('vx'), I('vy'), I('vz')
+
+    solver = Solver()
+
+    for i, p in enumerate(particles[:4]):
+        x0,y0,z0,pvx,pvy,pvz = p
+        t = I(f't{i}')
+        solver.add(t>=0)
+        solver.add(x + vx * t == x0 + pvx * t)
+        solver.add(y + vy * t == y0 + pvy * t)
+        solver.add(z + vz * t == z0 + pvz * t)
+    
+    print(solver.check())
+
+    model = solver.model()
+    rx, ry, rz = model.eval(x).as_long(), model.eval(y).as_long(), model.eval(z).as_long()
+    return rx + ry + rz
+
+print(solve(particles))
