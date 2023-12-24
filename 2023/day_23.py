@@ -1,23 +1,7 @@
 from collections import defaultdict, deque
 
-
 path = "day_23.txt"
 # path = "test.txt"
-
-    
-def draw_step(current, grid):
-    OKGREEN = '\033[92m'
-    ENDC = '\033[0m'
-    for i,line in enumerate(grid):
-        print("\n", end='')
-
-        for j,c in enumerate(line):
-            if (i,j) == current:
-                print(f'{OKGREEN}X{ENDC}', end='')
-            else:
-                print(c, end='')
-    
-    print()    
 
 directions = {
     'l': (0, -1),
@@ -33,65 +17,73 @@ slopes = {
     '^': (-1, 0)
 }
 
-
-def dfs(grid):
-    s = deque([(0, grid[0].index('.'), 0, (-1, 0))])
-    seen = defaultdict(int)
+def get_neighboors(coord, grid):
+    r,c = coord
     R = len(grid)
     C = len(grid[0])
+    n = []
+    for i,j in directions.values():
+        nxt_r = r+i
+        nxt_c = c+j
+        if 0 <= nxt_r < R and 0 <= nxt_c < C and grid[nxt_r][nxt_c] != '#':
+            n.append((nxt_r, nxt_c))
 
-    while len(s) > 0:
-        r,c, steps, prev = s.popleft()
-        seen[(r,c)] = steps
-        # draw((r,c), grid)
-        for i,j in directions.values():
-            nxt_r = r+i
-            nxt_c = c+j
-            nxt_step = steps + 1
-            if 0 <= nxt_r < R and 0 <= nxt_c < C and \
-                grid[nxt_r][nxt_c] != '#' and (nxt_r,nxt_c) != prev:
-                char = grid[nxt_r][nxt_c]
-                if char in slopes and \
-                    (r,c) == (slopes[char][0] + nxt_r, slopes[char][1] + nxt_c):
-                    continue
-                elif char in slopes:
-                    if seen[(nxt_r, nxt_c)] > nxt_step:
-                        continue
-                    seen[(nxt_r, nxt_c)] = nxt_step
-                    
-                    s.appendleft((nxt_r + slopes[char][0], nxt_c + slopes[char][1], nxt_step + 1, (nxt_r, nxt_c)))
-                    continue
-                
-                s.appendleft((nxt_r, nxt_c, nxt_step, (r,c)))
+    return n
 
-    return seen
+# thanks to https://github.com/janek37/advent-of-code/blob/main/2023/day23.py
+# My graph skills kinda suck
+def build_graph(grid):
+    g = {}
+    s = deque([(0, grid[0].index('.'))])
+
+    while s:
+        r,c = s.pop()
+        if (r,c) in g:
+            continue
+
+        g[(r,c)] = []
+        for nxt_r,nxt_c in get_neighboors((r,c), grid):
+            prev = (r,c)
+            distance = 1
+            while True:
+                n = [x for x in get_neighboors((nxt_r, nxt_c), grid) if x != prev]
+
+                if len(n) != 1:
+                    break
+
+                prev = (nxt_r, nxt_c)
+                nxt_r, nxt_c = n[0]
+                distance += 1
+
+            g[(r,c)].append((nxt_r, nxt_c, distance))
+            s.append((nxt_r, nxt_c))
+
+    return g
+
+
+def dfs(graph, start, goal):
+    s = [(start, 0, {start})]
+    distances = defaultdict(int)
+
+    while s:
+        current, distance, visited = s.pop()
+        
+        distances[current] = max(distances[current], distance)
+        
+        for r,c,d in graph[current]:
+            if (r,c) in visited or current == goal:
+                continue
+            s.append(((r,c), distance + d, visited | {(r,c)}))
+
+    return distances
 
 
 with open(path, 'r') as file:
-    grid = [[c for c in line.strip()] for line in file]
+    grid = [[c if c not in slopes else '.' for c in line.strip() ] for line in file]
 
 
 R = len(grid)
 C = len(grid[0])
-
-# debug stuff
-# def draw(current, grid):
-#     OKGREEN = '\033[92m'
-#     ENDC = '\033[0m'
-#     for i,line in enumerate(grid):
-#         print("\n", end='')
-
-#         for j,c in enumerate(line):
-#             if (i,j) in current:
-#                 print(current[(i,j)], end='\t')
-#             else:
-#                 print(c, end='\t')
-    
-#     print()
-
-
-# draw(dfs(grid), grid)
-
-distances = dfs(grid)
-
-print(distances[(R-1, grid[R-1].index('.'))])
+start = (0,1)
+goal = (R-1, grid[R-1].index('.'))
+print(dfs(build_graph(grid), start, goal)[goal])
