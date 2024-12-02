@@ -1,50 +1,62 @@
+# Code readability improved after submission with chat GPT, check previous commit to read my impossible to read code
+
 path = "day_02.txt"
-# path = "test.txt"
 
-def is_safe(arr):
+def is_safe(numbers):
+    """
+    Checks if the sequence follows the safety rule. 
+    A sequence is safe if adjacent differences are between -3 and +3 (exclusive),
+    and the direction of differences doesn't alternate.
+    
+    Returns:
+        (bool, int): Tuple of safety status and the index of violation (if any).
+    """
     direction = None
-    for i in range(len(arr) - 1):
-        a = int(arr[i]) - int(arr[i+1])
+    for idx in range(len(numbers) - 1):
+        diff = int(numbers[idx]) - int(numbers[idx + 1])
 
-        if 1 <= abs(a) <=3:
-            if a < 0 and direction != "ASC":
-                direction = "DESC"
-            elif a > 0 and direction != "DESC":
-                direction = "ASC"
-            else:
-                return False, i
+        if 1 <= abs(diff) <= 3:
+            new_direction = "ASC" if diff > 0 else "DESC"
+            if direction is None:
+                direction = new_direction
+            elif direction != new_direction:
+                return False, idx
         else:
-            return False, i            
-    return True, i
+            return False, idx
+    return True, -1
 
-with open(path) as f:
-    lines = f.readlines()
+def test_with_removed_index(numbers, index_to_remove):
+    """
+    Checks if the sequence is safe after removing the element at the given index.
+    
+    Returns:
+        bool: Whether the modified sequence is safe.
+    """
+    reduced_sequence = [numbers[i] for i in range(len(numbers)) if i != index_to_remove]
+    is_safe_result, _ = is_safe(reduced_sequence)
+    return is_safe_result
 
-safe = 0
-for l in lines:
-    ns = l.split()
+with open(path) as file:
+    lines = file.readlines()
 
-    error = None
-    r,i = is_safe(ns)
+part_2 = 0
+part_1 = 0
 
-    if r:
-        safe += 1
+for line in lines:
+    numbers = line.split()
+    is_safe_result, violation_index = is_safe(numbers)
+
+    if is_safe_result:
+        part_1 += 1
+        part_2 += 1
     else:
-        damp1, y = is_safe([ns[x] for x in range(len(ns)) if x != i])
-        damp2, y = is_safe([ns[x] for x in range(len(ns)) if x != i+1])
-        damp3, y = is_safe([ns[x] for x in range(len(ns)) if x != i-1])
+        # Check if removing an adjacent element resolves the issue
+        if (
+            test_with_removed_index(numbers, violation_index) or
+            test_with_removed_index(numbers, violation_index + 1) or
+            test_with_removed_index(numbers, violation_index - 1)
+        ):
+            part_2 += 1
 
-        if damp1:
-            print("safe damp: ",[ns[x] for x in range(len(ns)) if x != i], l)
-            safe += 1
-        elif damp2:
-            print("safe damp: ",[ns[x] for x in range(len(ns)) if x != i], l)
-            safe += 1
-        elif damp3:
-            print("safe damp: ",[ns[x] for x in range(len(ns)) if x != i-1], l)
-            safe += 1
-
-print(safe)
-        
-
- 
+print("part 1: ", part_1)
+print("part 2: ", part_2)
