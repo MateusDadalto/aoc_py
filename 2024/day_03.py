@@ -9,27 +9,36 @@ def parse_mul(s:str):
 
     return int(first_number) * int(second_number)
 
-def start_disabled(s:str):
-    return s.startswith(s.split("don't()")[0])
-
 with open(path) as f:
+    # will treat everything as a single string since each new line does not reset the state of the DOs and DON'Ts
     lines = f.read()
 
-total = 0
 
-toggle_sections = []
+#### PART 1 #####
+p1 = 0
+for i in re.findall(r"mul\(\d+,\d+\)", lines):
+    p1 += parse_mul(i)
+
+print("p1: ", p1)
+
+##### PART 2 #####
+
+# First split the sections into DO sections 
+# it may contain don't in it but I'm sure they will start with DO()
+# From the example: ["xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)un", "mul(8,5))"]
 dos = lines.split("do()")
-do_then_dont = [i.split("don't()") for i in dos]
-for do in do_then_dont:
-    status = True
-    for section in do:
-        # print(section, status)
-        if status:
-            for i in re.findall(r"mul\(\d+,\d+\)", section):
-                if status:
-                    total += parse_mul(i)
-    
-        status = False
-    
 
-print("p2: ", total)
+# For each DO section split it in sub-sections on every don't
+# the first section will be DO, the others will be DON'T
+# From the example: [["xmul(2,4)&mul[3,7]!^","_mul(5,5)+mul(32,64](mul(11,8)un"], ["mul(8,5))"]]
+#                       /\ FIRST IS DO           OTHERS ARE /\ DONT                 /\ FIRST IS DO
+do_then_dont = [i.split("don't()") for i in dos]
+
+p2 = 0
+for do_and_donts in do_then_dont:
+    # First is DO
+    do = do_and_donts[0]
+    for i in re.findall(r"mul\(\d+,\d+\)", do):
+        p2 += parse_mul(i)
+    
+print("p2: ", p2)
