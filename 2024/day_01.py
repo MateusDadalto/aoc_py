@@ -1,6 +1,7 @@
 path = "day_01.txt"
+path = "test.txt"
 
-with open("day_01.txt") as f:
+with open(path) as f:
     lines = f.readlines()
 
 left_col = []
