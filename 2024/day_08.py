@@ -1,5 +1,3 @@
-from collections import defaultdict, Counter
-
 path = "day_08.txt"
 # path = "test.txt"
 
