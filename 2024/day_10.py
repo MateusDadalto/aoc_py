@@ -29,7 +29,7 @@ def is_inside(grid, row, col):
 
 total = 0
 
-def count_score(grid, trail_head):
+def count_score(grid, trail_head, part_2):
     score = 0
     visited_ends = set()
     tiles = [trail_head]
@@ -38,7 +38,7 @@ def count_score(grid, trail_head):
         row, col = tiles.pop()
         height = int(grid[row][col])
         
-        if (row, col) not in visited_ends and height == 9:
+        if (part_2 or (row, col) not in visited_ends) and height == 9:
             score += 1
             visited_ends.add((row, col))
             continue
@@ -51,4 +51,5 @@ def count_score(grid, trail_head):
             
     return score
 
-print(sum([count_score(lines, i) for i in trail_heads]))
+print("p1:", sum([count_score(lines, i, False) for i in trail_heads]))
+print("p2:", sum([count_score(lines, i, True) for i in trail_heads]))
