@@ -154,7 +154,7 @@ def possible_vertical(next_tiles):
     left = next_tiles[0]
     right = next_tiles[1]
     
-    return ((left[0], left[1] - 1), left), (left, right), (right, (right[0], right[1]-1))
+    return ((left[0], left[1] - 1), left), (left, right), (right, (right[0], right[1]+1))
     
 
 def move_box_2(box, direction, walls, boxes: Set):
@@ -184,8 +184,6 @@ def move_box_2(box, direction, walls, boxes: Set):
             if not success:
                 return False, boxes
         
-        return True, new_boxes
-    
     new_boxes.remove(box)
     new_boxes.add(next_box)
 
