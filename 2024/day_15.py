@@ -4,8 +4,8 @@ from typing import Set
 from copy import deepcopy
 from time import sleep
 
-path = "day_15.txt"
-# path = "test.txt"
+# path = "day_15.txt"
+path = "test.txt"
 
 directions = {">": (0, 1), "v": (1, 0), "<": (0, -1), "^": (-1, 0)}
 
@@ -122,7 +122,7 @@ walls_2 = set()
 ## https://stackoverflow.com/questions/3204245/how-do-i-convert-a-tuple-of-tuples-to-a-one-dimensional-list-using-list-comprehe
 walls_2.update(sum((convert_p2(i, False) for i in walls), ()))
 boxes_2 =set([convert_p2(i, False) for i in boxes])
-print(boxes_2)
+# print(boxes_2)
 robot_2, _ = convert_p2(robot, True)
 ROWS_2 = ROWS
 COLS_2 = COLS * 2
@@ -228,20 +228,20 @@ def move_2(robot, direction, walls, boxes):
 
 print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, 'no move')
 
+speed = 0.5/float(input('Choose a speed between 1 and 10: '))
 i = 0
 for char in commands:
     robot_2, boxes_2 = move_2(robot_2, char, walls_2, boxes_2)
     percentage = i/len(commands) * 100
-    print(f'{percentage:.2f}%', end='\r')
+    print(f'{percentage:.2f}%')
     i+=1
-    # print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, char)
-    # sleep(0.2)
+    print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, char)
+    sleep(speed)
 
 print('100.00%')
 
 p2 = sum([100*i[0][0] + i[0][1] for i in boxes_2])
 
-print(p2)
+print("Part 2: ", p2)
 
-# print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, '')
-# print_grid(ROWS, COLS, robot_1, walls, boxes_1, char)
+input('END')
