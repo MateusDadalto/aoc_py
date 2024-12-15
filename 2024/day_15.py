@@ -2,9 +2,10 @@ from collections import Counter
 from itertools import cycle
 from typing import Set
 from copy import deepcopy
+from time import sleep
 
 path = "day_15.txt"
-path = "test.txt"
+# path = "test.txt"
 
 directions = {">": (0, 1), "v": (1, 0), "<": (0, -1), "^": (-1, 0)}
 
@@ -172,8 +173,14 @@ def move_box_2(box, direction, walls, boxes: Set):
     if direction == '>' and (next_tile_right, (next_tile_right[0] + d[0], next_tile_right[1] + d[1])) in boxes:
         success, new_boxes = move_box_2((next_tile_right, (next_tile_right[0] + d[0], next_tile_right[1] + d[1])), direction, walls, boxes)
         
+        if not success:
+            return False, boxes
+        
     if direction == '<' and ((next_tile_left[0] + d[0], next_tile_left[1] + d[1]), next_tile_left) in boxes:
         success, new_boxes = move_box_2(((next_tile_left[0] + d[0], next_tile_left[1] + d[1]), next_tile_left), direction, walls, boxes)
+        
+        if not success:
+            return False, boxes
         
     if direction in '^v' and any([i in boxes for i in possible_vertical(next_box)]):
         next_boxes = [i for i in possible_vertical(next_box) if i in boxes]
@@ -221,15 +228,20 @@ def move_2(robot, direction, walls, boxes):
 
 print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, 'no move')
 
-
+i = 0
 for char in commands:
     robot_2, boxes_2 = move_2(robot_2, char, walls_2, boxes_2)
-    print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, char)
-    input()
+    percentage = i/len(commands) * 100
+    print(f'{percentage:.2f}%', end='\r')
+    i+=1
+    # print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, char)
+    # sleep(0.2)
 
-# p1 = sum([100*i[0] + i[1] for i in boxes_1])
+print('100.00%')
 
-# print(p1)
+p2 = sum([100*i[0][0] + i[0][1] for i in boxes_2])
 
-print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, '')
+print(p2)
+
+# print_grid2(ROWS_2, COLS_2, robot_2, walls_2, boxes_2, '')
 # print_grid(ROWS, COLS, robot_1, walls, boxes_1, char)
