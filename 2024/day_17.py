@@ -15,15 +15,16 @@ with open(path) as f:
     A, B, C = [parse_register(i) for i in inpt.split('\n\n')[0].splitlines()]
     instructions = parse_instructions(inpt.split('\n\n')[1])
     
-print(A, B, C)
-print(instructions)
+# print(A, B, C)
+# print(instructions)
 
 class Computer:
-    def __init__(self, a, b, c):
+    def __init__(self, a, b, c, log_ops):
         self.a = a
         self.b = b
         self.c = c
         self.output = []
+        self.log = log_ops
         self.op_map = {
             0: self.adv,
             1: self.bxl,
@@ -58,11 +59,17 @@ class Computer:
         value = self.combo_op_value(combo_op)
         result = self.a//(2**value)
         
+        if self.log:
+            print(f'VARIABLE INPUT {combo_op} adv -> A // 2^{value} -> SET A {result}')
+        
         self.a = result
         return -1
     
     def bxl(self, literal_op):
         result = self.b ^ literal_op
+        
+        if self.log:
+            print(f'CONSTANT INPUT bxl -> B XOR {literal_op} -> SET B {result}')
 
         self.b = result
         return -1
@@ -73,31 +80,47 @@ class Computer:
         
         self.b = result
         
+        if self.log:
+            print(f'VARIABLE INPUT {combo_op} bst -> {value} % 8 -> SET B {result}')
+        
         return -1
     
     def jnz(self, literal_op):
         if self.a == 0:
+            if self.log:
+                print(f'CONSTANT INPUT jnz -> A is 0, do nothing')
             return -1
+        
+            
+        if self.log:
+            print(f'CONSTANT INPUT jnz -> A is {self.a} jump to {literal_op}')
         
         return literal_op
     
     def bxc(self, _):
         result = self.b^self.c
         
+        if self.log:
+            print(f'CONSTANT INPUT bxc -> B xor C {self.b} ^ {self.c} -> SET B {result}')
         self.b = result
         
         return -1
     
     def out(self, combo_op):
         value = self.combo_op_value(combo_op)
-        
-        self.output.append(value%8)
+        result = value%8
+        if self.log:
+            print(f'APPEND OUTPUT out -> Combo op {combo_op} -> value: {value} % 8-> APPEND OUT {result}')
+        self.output.append(result)
         
         return -1
         
     def bdv(self, combo_op):
         value = self.combo_op_value(combo_op)
         result = self.a//(2**value)
+        
+        if self.log:
+            print(f'VARIABLE INPUT {combo_op} bdv -> A // 2^{value} -> SET B {result}')
         
         self.b = result
         
@@ -107,25 +130,80 @@ class Computer:
         value = self.combo_op_value(combo_op)
         result = self.a//(2**value)
         
+        if self.log:
+            print(f'VARIABLE INPUT {combo_op} cdv -> A // 2^{value} -> SET C {result}')
+        
         self.c = result
         
         return -1
     
     def perform_operation(self, op_code, operand):
-        
+        if self.log:
+            print(f'perform operation {op_code} with operand {operand}')
         return self.op_map[op_code](operand)
 
 
-computer = Computer(A,B,C)
 
-i = 0
+def process(a,b,c, instructions, log):
+    computer = Computer(a,b,c, log)
+    i = 0
+    
+    while 0 <= i < len(instructions) - 1:
+        
+        op_code, op = instructions[i], instructions[i+1]
+        
+        result = computer.perform_operation(op_code, op)
+        i = result if result >= 0 else i + 2
+        out_len = len(computer.output)
+        
+    print('Halted')
+            
+    print('p1:', ','.join(str(i) for i in computer.output))
+    
+def process_single(a,b,c, instructions, log):
+    computer = Computer(a,b,c, log)
+    i = 0
+    
+    while 0 <= i < len(instructions) - 1:
+        
+        op_code, op = instructions[i], instructions[i+1]
+        
+        result = computer.perform_operation(op_code, op)
+        i = result if result >= 0 else i + 2
+        out_len = len(computer.output)
+        
+        if out_len == 1:
+            return computer.output[0]
+    
+    return None
 
-while 0 <= i < len(instructions) - 1:
+p1 = process(A, B, C, instructions, False)
+
+# after manually evaluating my loop, I saw that in each iteration A = A//8
+# So to find the number we do a "DFS" (don't know if it is actually a DFS) starting from the last number
+# Find A where process(A,0,0) == rev(instructions)[0]. 
+# Multiply that A by 8 and try to find new A where process(A,0,0) == rev(instructions)[+1] AND A//8 == previous A
+# If there is no A that satisfies that condition, go back to previous A and try A+1
+
+q = deque([(0, 0, None)])
+rev = [j for j in reversed(instructions)]
+p2 = 0
+log = False
+while len(q) > 0:
+    x, i, prev_x = q.popleft()
     
-    op_code, op = instructions[i], instructions[i+1]
+    if len(rev) == i:
+        p2 = prev_x
+        break
     
-    result = computer.perform_operation(op_code, op)
-    i = result if result >= 0 else i + 2
-    # print(i)
+    if prev_x and x//8 > prev_x:
+        continue
     
-print('p1: ', ','.join(str(i) for i in computer.output))
+    result = process_single(x, 0, 0, instructions, log)
+    if result == rev[i]:
+
+        q.appendleft((x*8, i+1, x))
+    
+    q.append((x+1, i, x))
+    
+print('p2:', p2)
