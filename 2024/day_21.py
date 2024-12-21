@@ -2,7 +2,7 @@ from collections import deque
 
 
 path = "day_21.txt"
-path = "test.txt"
+# path = "test.txt"
 
 directions = {(0, 1): ">", (1, 0): "v", (0, -1): "<", (-1, 0): "^"}
 
@@ -21,47 +21,78 @@ with open(path) as f:
 def move_btn(start, target, keyboard):
     q = deque([(start, [])])
     
+    possible_paths = []
+    mi = 1_000_000_000
     while len(q) > 0:
         current, steps = q.popleft()
         
+        if len(steps) > mi:
+            continue
+        
         if current == target:
-            return [i for i in reversed(steps)]
+            mi = min(mi, len(steps))
+            possible_paths.append([i for i in reversed(steps)])
+            continue
     
         for d in directions:
             next_key = (current[0]+d[0], current[1]+d[1])
             
             if next_key in keyboard and keyboard[next_key] != '#':
-                q.append((next_key, [directions[d]] + steps ))
+                q.append((next_key, [directions[d]] + steps))
     
-    assert False, "Should never get here"
+    return possible_paths
 
 def build_sequence(instruction, keyboard):
-    steps = []
+    steps = [[]]
     # Start is A
     current = [key for key in keyboard if keyboard[key] == 'A'][0]
     for ch in instruction:
         # Don't look at this line
         target = [key for key in keyboard if keyboard[key] == ch][0]
         
-        steps = steps + move_btn(current, target, keyboard) + ['A']
+        next_steps = move_btn(current, target, keyboard)
+        possibilities = []
+        for n in next_steps:
+            possibilities.extend([s + n + ['A'] for s in steps])
+            
+        steps = possibilities
         current = target
-        
-    return steps 
     
+    # [['<'], 'A', ['^'], 'A', ['>', '^', '^'], ['^', '>', '^'], ['^', '^', '>'], 'A', ['v', 'v', 'v'], 'A']
+    
+    return steps 
+
+def run(possible_sequences, keyboard):
+    
+    m = 1_000_000_000
+    results = []
+    for sequence in possible_sequences:
+        # every result of a single iteration will have the same len
+        possible_results = build_sequence(sequence, keyboard)
+        size = len(possible_results[0])
+        if size == m:
+            results.extend(possible_results)
+        elif size < m:
+            m = size
+            results = possible_results
+    
+    return results    
+
 p1 = 0
 for instruction in instructions:
     
     numeric = int(instruction[:3])
     
-    first_step = build_sequence(instruction, numeric_kb)
-    print(''.join(first_step))
-    second_step = build_sequence(first_step, directional_kb)
-    print(''.join(second_step))
-    third_step = build_sequence(second_step, directional_kb)
-    print(''.join(third_step))
-    print( f'{len(third_step)} * {numeric}')
+    first_step = run([instruction], numeric_kb)
+    # print(first_step)
+    second_step = run(first_step, directional_kb)
+    # print(''.join(second_step))
+    third_step = run(second_step, directional_kb)
+    size = len(third_step[0])
+    # print(''.join(third_step))
+    print( f'{size} * {numeric}')
     
-    p1 += numeric*len(third_step)
+    p1 += numeric*size
     
 print(p1)
     
