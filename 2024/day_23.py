@@ -1,5 +1,4 @@
 from collections import deque
-from functools import cache
 import networkx as nx
 
 path = "day_23.txt"
@@ -15,3 +14,5 @@ for c in connections:
     graph.add_edge(pc1,pc2)
 
 print(','.join(sorted(max([i for i in nx.find_cliques(graph)], key=len))))
+
+# I'll leave a mental note for me to implement my own clique finding algorithim in the future
