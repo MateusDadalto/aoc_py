@@ -14,4 +14,4 @@ for c in connections:
     pc1, pc2 = c.split('-')
     graph.add_edge(pc1,pc2)
 
-print(len([i for i in nx.enumerate_all_cliques(graph) if len(i) == 3 and any([el.startswith('t') for el in i])]))
+print(','.join(sorted(max([i for i in nx.find_cliques(graph)], key=len))))
