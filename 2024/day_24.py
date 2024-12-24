@@ -1,8 +1,9 @@
 from collections import defaultdict
 from collections import deque
+import graphviz
 
 path = "day_24.txt"
-path = "test.txt"
+# path = "test.txt"
 
 with open(path) as f:
     inpt = [section for section in f.read().split('\n\n')]
@@ -25,19 +26,35 @@ def run_op(g1: bool, op: str, g2: bool):
 
 gates = deque([])
 
-values = defaultdict()
+values = {}
+initial_values = {}
+graph = {}
+x = []
+y = []
+gviz = graphviz.Digraph(name="t2")
+
+for line in second_section:
+    g1, op, g2, _, dest = line.split()
+    
+    gates.append((g1, op, g2, dest))
+    graph[dest] = (g1, op, g2)
+    gviz.edge(dest, g1, label=op)
+    gviz.edge(dest, g2, label=op)
 
 for line in first_section:
     key = line[0:3]
     value = int(line[-1]) == 1
     
     values[key] = value
+    initial_values[key] = value
+    if key.startswith('x'):
+        x.append(key)
+    if key.startswith('y'):
+        y.append(key)
+        
     
-for line in second_section:
-    g1, op, g2, _, dest = line.split()
-    
-    gates.append((g1, op, g2, dest))
-    
+
+
 results = []
 while (len(gates)) > 0:
     g1, op, g2, dest = gates.popleft()
@@ -53,6 +70,31 @@ while (len(gates)) > 0:
         results.append(dest)
 
 results = sorted(results)  
-print(results)
+# print(results)
+sum_z = sum([values[key] << i for i,key in enumerate(results)])
+sum_x = sum([values[key] << i for i,key in enumerate(sorted(x))])
+sum_y = sum([values[key] << i for i,key in enumerate(sorted(y))])
+print('p1:', sum_z)
+print('x:', sum_x)
+print('y:', sum_y)
+print('x+y:', sum_y + sum_x)
+print('binxy:', bin((sum_y + sum_x)))
+print('bin z:', bin(sum_z))
+print('bin d:', f'{(sum_y + sum_x) ^ sum_z:#048b}')
+    
+def test(node:str, graph, initial_values):
+    if node in initial_values:
+        print(node, '->', initial_values[node])
+        return
+    
+    print(node, '->', graph[node])
+    g1, _, g2 = graph[node]
+    test(g1, graph, initial_values)
+    test(g2, graph, initial_values)
 
-print(sum([values[key] << i for i,key in enumerate(results)]))
+    
+for dest in values:
+    gviz.node(dest, label=f'{dest} - {int(values[dest])}')
+
+# From here ownwards it was Ripple Carry Adder visual analysis (thanks reddit)
+gviz.render(directory='./')
