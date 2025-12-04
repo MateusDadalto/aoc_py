@@ -17,18 +17,18 @@ def get_highest_digit(bank: str):
     return (highest, highest_i)
 
 part_1 = 0
-# for bank in banks:
-#     (first, i) = get_highest_digit(bank[:-1])
+for bank in banks:
+    (first, i) = get_highest_digit(bank[:-1])
     
-#     (second, j) = get_highest_digit(bank[(i+1):])
+    (second, j) = get_highest_digit(bank[(i+1):])
     
-#     bank_val = first*10 + second
+    bank_val = first*10 + second
     
-#     part_1+=bank_val
+    part_1+=bank_val
     
-#     print(bank, bank_val)
+    # print(bank, bank_val)
 
-# print(part_1)
+print("Day 3 part 1", part_1)
 
 def get_highest_combination(bank, size):
     acc = ''
@@ -45,7 +45,7 @@ def get_highest_combination(bank, size):
         temp = temp[new_index+1:]
         # print(acc, len(acc), temp)
             
-    print(bank, acc)
+    # print(bank, acc)
     
     return int(acc)
 
@@ -56,4 +56,4 @@ for bank in banks:
     # (second, j) = get_highest_digit(bank[i+1: -10])
     # (third, k) = get_highest_digit(bank[j+1: -9])
     
-print(part_2)
+print("Day 3 part 2", part_2)
