@@ -34,44 +34,30 @@ def merge_ranges(ranges: tuple[int,int]):
             
             # starts before and ends inside the range
             if compare_start < merged_start and merged_start <= compare_end <= merged_end:
-                if (compare_start, compare_end) in new_ranges:
-                    new_ranges.remove((compare_start, compare_end))
-                    
                 compare_end = merged_end
-                new_ranges.add((compare_start, compare_end))
                 
             # starts in the inside and ends after the range
             elif merged_start <= compare_start <= merged_end and merged_end < compare_end:
-                if (compare_start, compare_end) in new_ranges:
-                    new_ranges.remove((compare_start, compare_end))
-                    
                 compare_start = merged_start
-                new_ranges.add((compare_start, compare_end))
             
             # range totally contained in the comparison range 
             elif merged_start <= compare_start and compare_end <= merged_end:
-                if (compare_start, compare_end) in new_ranges:
-                    new_ranges.remove((compare_start, compare_end))
-                    
                 compare_start = merged_start
                 compare_end = merged_end
-                new_ranges.add((compare_start, compare_end))
 
-            # comparison range totally contained in range (I Forgot this consition at first)
-            elif compare_start <= merged_start and merged_end <= compare_end:
-                new_ranges.add((compare_start, compare_end))
-            
-            # range not intersecting with comparison range
-            else:
-                new_ranges.add((compare_start, compare_end))
+            # if all checks fail, see comparison range totally contained in range (I Forgot this consition at first)
+            # if it is not, it means they are decoupled from each other, so add the comparison range to new ranges array
+            elif not (compare_start <= merged_start and merged_end <= compare_end):
                 new_ranges.add((merged_start, merged_end))
+            
+        new_ranges.add((compare_start, compare_end))
         
         merged_ranges = new_ranges
         
     return merged_ranges
     
 result = list(merge_ranges(range_lines))
-print(result)
+# print(result)
 
 # validation (this made me pick the forgotten condition)
 for i in range(len(result)):
